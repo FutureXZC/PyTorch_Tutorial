@@ -8,21 +8,30 @@ import numpy as np
 import os
 import pickle
 
+# 在 PyTorch_Tutorial/Code 目录下运行
+# data_dir = os.path.join("..", "..", "Data", "cifar-10-batches-py")
+# train_o_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_train")
+# test_o_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_test")
 
-data_dir = os.path.join("..", "..", "Data", "cifar-10-batches-py")
-train_o_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_train")
-test_o_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_test")
+# 在 PyTorch_Tutorial 目录下运行
+data_dir = os.path.join(".", "Data", "cifar-10-batches-py")
+train_o_dir = os.path.join(".", "Data", "cifar-10-png", "raw_train")
+test_o_dir = os.path.join(".", "Data", "cifar-10-png", "raw_test")
+# 不解压训练集，仅解压测试集
+Train = False
 
-Train = False   # 不解压训练集，仅解压测试集
 
 # 解压缩，返回解压后的字典
 def unpickle(file):
+    print('unpickle: ' + file)
     with open(file, 'rb') as fo:
         dict_ = pickle.load(fo, encoding='bytes')
     return dict_
 
+
 def my_mkdir(my_dir):
     if not os.path.isdir(my_dir):
+        print('mkdir: ' + my_dir)
         os.makedirs(my_dir)
 
 
@@ -30,7 +39,8 @@ def my_mkdir(my_dir):
 if __name__ == '__main__':
     if Train:
         for j in range(1, 6):
-            data_path = os.path.join(data_dir, "data_batch_" + str(j))  # data_batch_12345
+            data_path = os.path.join(data_dir, "data_batch_" +
+                                     str(j))  # data_batch_12345
             train_data = unpickle(data_path)
             print(data_path + " is loading...")
 
@@ -42,7 +52,7 @@ if __name__ == '__main__':
                 o_dir = os.path.join(train_o_dir, label_num)
                 my_mkdir(o_dir)
 
-                img_name = label_num + '_' + str(i + (j - 1)*10000) + '.png'
+                img_name = label_num + '_' + str(i + (j - 1) * 10000) + '.png'
                 img_path = os.path.join(o_dir, img_name)
                 imwrite(img_path, img)
             print(data_path + " loaded.")

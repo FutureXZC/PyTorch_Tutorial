@@ -8,11 +8,19 @@ import glob
 import random
 import shutil
 
-dataset_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_test")
-train_dir = os.path.join("..", "..", "Data", "train")
-valid_dir = os.path.join("..", "..", "Data", "valid")
-test_dir = os.path.join("..", "..", "Data", "test")
+# 在 PyTorch_Tutorial/Code 目录下运行
+# dataset_dir = os.path.join("..", "..", "Data", "cifar-10-png", "raw_test")
+# train_dir = os.path.join("..", "..", "Data", "train")
+# valid_dir = os.path.join("..", "..", "Data", "valid")
+# test_dir = os.path.join("..", "..", "Data", "test")
 
+# 在 PyTorch_Tutorial 目录下运行
+dataset_dir = os.path.join(".", "Data", "cifar-10-png", "raw_test")
+train_dir = os.path.join(".", "Data", "train")
+valid_dir = os.path.join(".", "Data", "valid")
+test_dir = os.path.join(".", "Data", "test")
+
+# 划分比例，训练集 : 验证集 : 测试集 = 8 : 1 : 1
 train_per = 0.8
 valid_per = 0.1
 test_per = 0.1
@@ -44,7 +52,10 @@ if __name__ == '__main__':
                     out_dir = os.path.join(test_dir, sDir)
 
                 makedir(out_dir)
-                out_path = os.path.join(out_dir, os.path.split(imgs_list[i])[-1])
+                out_path = os.path.join(out_dir,
+                                        os.path.split(imgs_list[i])[-1])
                 shutil.copy(imgs_list[i], out_path)
 
-            print('Class:{}, train:{}, valid:{}, test:{}'.format(sDir, train_point, valid_point-train_point, imgs_num-valid_point))
+            print('Class:{}, train:{}, valid:{}, test:{}'.format(
+                sDir, train_point, valid_point - train_point,
+                imgs_num - valid_point))

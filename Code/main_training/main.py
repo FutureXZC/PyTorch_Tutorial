@@ -10,23 +10,35 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
 import sys
-sys.path.append("..")
+# sys.path.append("..")  # 在 PyTorch_Tutorial/Code 目录下运行
+sys.path.append("./Code")  # 在 PyTorch_Tutorial 目录下运行
 from utils.utils import MyDataset, validate, show_confMat
 from tensorboardX import SummaryWriter
 from datetime import datetime
 
-train_txt_path = os.path.join("..", "..", "Data", "train.txt")
-valid_txt_path = os.path.join("..", "..", "Data", "valid.txt")
+# 在 PyTorch_Tutorial/Code 目录下运行
+# train_txt_path = os.path.join("..", "..", "Data", "train.txt")
+# valid_txt_path = os.path.join("..", "..", "Data", "valid.txt")
 
-classes_name = ['plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck']
+# 在 PyTorch_Tutorial 目录下运行
+train_txt_path = os.path.join(".", "Data", "train.txt")
+valid_txt_path = os.path.join(".", "Data", "valid.txt")
+
+classes_name = [
+    'plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship',
+    'truck'
+]
 
 train_bs = 16
 valid_bs = 16
 lr_init = 0.001
-max_epoch = 1
+max_epoch = 100
 
 # log
-result_dir = os.path.join("..", "..", "Result")
+# 在 PyTorch_Tutorial/Code 目录下运行
+# result_dir = os.path.join("..", "..", "Result")
+# 在 PyTorch_Tutorial 目录下运行
+result_dir = os.path.join(".", "Result")
 
 now_time = datetime.now()
 time_str = datetime.strftime(now_time, '%m-%d_%H-%M-%S')
@@ -46,21 +58,19 @@ normTransform = transforms.Normalize(normMean, normStd)
 trainTransform = transforms.Compose([
     transforms.Resize(32),
     transforms.RandomCrop(32, padding=4),
-    transforms.ToTensor(),
-    normTransform
+    transforms.ToTensor(), normTransform
 ])
 
-validTransform = transforms.Compose([
-    transforms.ToTensor(),
-    normTransform
-])
+validTransform = transforms.Compose([transforms.ToTensor(), normTransform])
 
 # 构建MyDataset实例
 train_data = MyDataset(txt_path=train_txt_path, transform=trainTransform)
 valid_data = MyDataset(txt_path=valid_txt_path, transform=validTransform)
 
 # 构建DataLoder
-train_loader = DataLoader(dataset=train_data, batch_size=train_bs, shuffle=True)
+train_loader = DataLoader(dataset=train_data,
+                          batch_size=train_bs,
+                          shuffle=True)
 valid_loader = DataLoader(dataset=valid_data, batch_size=valid_bs)
 
 # ------------------------------------ step 2/5 : 定义网络------------------------------------
@@ -101,20 +111,24 @@ class Net(nn.Module):
                 m.bias.data.zero_()
 
 
-net = Net()     # 创建一个网络
-net.initialize_weights()    # 初始化权值
+net = Net()  # 创建一个网络
+net.initialize_weights()  # 初始化权值
 
 # ------------------------------------ step 3/5 : 定义损失函数和优化器 ------------------------------------
 
-criterion = nn.CrossEntropyLoss()                                                   # 选择损失函数
-optimizer = optim.SGD(net.parameters(), lr=lr_init, momentum=0.9, dampening=0.1)    # 选择优化器
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50, gamma=0.1)     # 设置学习率下降策略
+criterion = nn.CrossEntropyLoss()  # 选择损失函数
+optimizer = optim.SGD(net.parameters(),
+                      lr=lr_init,
+                      momentum=0.9,
+                      dampening=0.1)  # 选择优化器
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=50,
+                                            gamma=0.1)  # 设置学习率下降策略
 
 # ------------------------------------ step 4/5 : 训练 --------------------------------------------------
 
 for epoch in range(max_epoch):
 
-    loss_sigma = 0.0    # 记录一个epoch的loss之和
+    loss_sigma = 0.0  # 记录一个epoch的loss之和
     correct = 0.0
     total = 0.0
     scheduler.step()  # 更新学习率
@@ -142,19 +156,23 @@ for epoch in range(max_epoch):
         if i % 10 == 9:
             loss_avg = loss_sigma / 10
             loss_sigma = 0.0
-            print("Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2%}".format(
-                epoch + 1, max_epoch, i + 1, len(train_loader), loss_avg, correct / total))
+            print(
+                "Training: Epoch[{:0>3}/{:0>3}] Iteration[{:0>3}/{:0>3}] Loss: {:.4f} Acc:{:.2%}"
+                .format(epoch + 1, max_epoch, i + 1, len(train_loader),
+                        loss_avg, correct / total))
 
             # 记录训练loss
             writer.add_scalars('Loss_group', {'train_loss': loss_avg}, epoch)
             # 记录learning rate
             writer.add_scalar('learning rate', scheduler.get_lr()[0], epoch)
             # 记录Accuracy
-            writer.add_scalars('Accuracy_group', {'train_acc': correct / total}, epoch)
+            writer.add_scalars('Accuracy_group',
+                               {'train_acc': correct / total}, epoch)
 
     # 每个epoch，记录梯度，权值
     for name, layer in net.named_parameters():
-        writer.add_histogram(name + '_grad', layer.grad.cpu().data.numpy(), epoch)
+        writer.add_histogram(name + '_grad',
+                             layer.grad.cpu().data.numpy(), epoch)
         writer.add_histogram(name + '_data', layer.cpu().data.numpy(), epoch)
 
     # ------------------------------------ 观察模型在验证集上的表现 ------------------------------------
@@ -187,10 +205,16 @@ for epoch in range(max_epoch):
                 pre_i = predicted[j].numpy()
                 conf_mat[cate_i, pre_i] += 1.0
 
-        print('{} set Accuracy:{:.2%}'.format('Valid', conf_mat.trace() / conf_mat.sum()))
+        print('{} set Accuracy:{:.2%}'.format(
+            'Valid',
+            conf_mat.trace() / conf_mat.sum()))
         # 记录Loss, accuracy
-        writer.add_scalars('Loss_group', {'valid_loss': loss_sigma / len(valid_loader)}, epoch)
-        writer.add_scalars('Accuracy_group', {'valid_acc': conf_mat.trace() / conf_mat.sum()}, epoch)
+        writer.add_scalars('Loss_group',
+                           {'valid_loss': loss_sigma / len(valid_loader)},
+                           epoch)
+        writer.add_scalars('Accuracy_group',
+                           {'valid_acc': conf_mat.trace() / conf_mat.sum()},
+                           epoch)
 print('Finished Training')
 
 # ------------------------------------ step5: 保存模型 并且绘制混淆矩阵图 ------------------------------------

@@ -4,8 +4,8 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-
 # ----------------------------------- load_state_dict
+
 
 class Net(nn.Module):
     def __init__(self):
@@ -29,11 +29,14 @@ class Net(nn.Module):
             elif isinstance(m, nn.Linear):
                 torch.nn.init.constant_(m.weight.data, 0)
                 m.bias.data.zero_()
+
+
 net = Net()
 
 # 保存，并加载模型参数(仅保存模型参数)
-torch.save(net.state_dict(), 'net_params.pkl')   # 假设训练好了一个模型net
-pretrained_dict = torch.load('net_params.pkl')
+torch.save(net.state_dict(),
+           './Code/3_optimizer/3_2_optimizer/net_params.pkl')  # 假设训练好了一个模型net
+pretrained_dict = torch.load('./Code/3_optimizer/3_2_optimizer/net_params.pkl')
 
 # 将net的参数全部置0，方便对比
 net.zero_param()

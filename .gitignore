@@ -3,10 +3,6 @@
 *.egg
 *.egg-info
 *.DS_Store
-/Data/cifar-10-batches-py
-/Data/cifar-10-png
-/Data/test
-/Data/train
-/Data/valid
-/Data/*.txt
+*.pkl
+/Data
 /Result

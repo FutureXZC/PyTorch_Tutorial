@@ -7,15 +7,20 @@ from tensorboardX import SummaryWriter
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 import sys
-sys.path.append("..")
+sys.path.append("..")  # 在 PyTorch_Tutorial/Code 目录下运行
+sys.path.append("./Code")  # 在 PyTorch_Tutorial 目录下运行
 from utils.utils import MyDataset, Net, normalize_invert
 from torch.utils.data import DataLoader
 
-
 vis_layer = 'conv1'
-log_dir = os.path.join("..", ".." "Result", "visual_featuremaps")
-txt_path = os.path.join("..", "..", "Data", "visual.txt")
-pretrained_path = os.path.join("..", "..", "Data", "net_params_72p.pkl")
+# 在 PyTorch_Tutorial/Code 目录下运行
+# log_dir = os.path.join("..", ".." "Result", "visual_featuremaps")
+# txt_path = os.path.join("..", "..", "Data", "visual.txt")
+# pretrained_path = os.path.join("..", "..", "Data", "net_params_72p.pkl")
+# 在 PyTorch_Tutorial 目录下运行
+log_dir = os.path.join("." "Result", "visual_featuremaps")
+txt_path = os.path.join(".", "Data", "visual.txt")
+pretrained_path = os.path.join(".", "Data", "net_params_72p.pkl")
 
 net = Net()
 pretrained_dict = torch.load(pretrained_path)
@@ -25,11 +30,9 @@ net.load_state_dict(pretrained_dict)
 normMean = [0.49139968, 0.48215827, 0.44653124]
 normStd = [0.24703233, 0.24348505, 0.26158768]
 normTransform = transforms.Normalize(normMean, normStd)
-testTransform = transforms.Compose([
-    transforms.Resize((32, 32)),
-    transforms.ToTensor(),
-    normTransform
-])
+testTransform = transforms.Compose(
+    [transforms.Resize((32, 32)),
+     transforms.ToTensor(), normTransform])
 # 载入数据
 test_data = MyDataset(txt_path=txt_path, transform=testTransform)
 test_loader = DataLoader(dataset=test_data, batch_size=1)
@@ -53,11 +56,18 @@ for name, layer in net._modules.items():
     if name == vis_layer:
         # 绘制feature maps
         x1 = x.transpose(0, 1)  # C，B, H, W  ---> B，C, H, W
-        img_grid = vutils.make_grid(x1, normalize=True, scale_each=True, nrow=2)  # B，C, H, W
-        writer.add_image(vis_layer + '_feature_maps', img_grid, global_step=666)
+        img_grid = vutils.make_grid(x1,
+                                    normalize=True,
+                                    scale_each=True,
+                                    nrow=2)  # B，C, H, W
+        writer.add_image(vis_layer + '_feature_maps',
+                         img_grid,
+                         global_step=666)
 
         # 绘制原始图像
         img_raw = normalize_invert(img, normMean, normStd)  # 图像去标准化
-        img_raw = np.array(img_raw * 255).clip(0, 255).squeeze().astype('uint8')
-        writer.add_image('raw img', img_raw, global_step=666)  # j 表示feature map数
+        img_raw = np.array(img_raw * 255).clip(0,
+                                               255).squeeze().astype('uint8')
+        writer.add_image('raw img', img_raw,
+                         global_step=666)  # j 表示feature map数
 writer.close()

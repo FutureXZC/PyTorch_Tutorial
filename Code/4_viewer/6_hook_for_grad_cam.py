@@ -42,7 +42,7 @@ def img_transform(img_in, transform):
     img = img_in.copy()
     img = Image.fromarray(np.uint8(img))
     img = transform(img)
-    img = img.unsqueeze(0)    # C*H*W --> B*C*H*W
+    img = img.unsqueeze(0)  # C*H*W --> B*C*H*W
     return img
 
 
@@ -53,11 +53,12 @@ def img_preprocess(img_in):
     :return: PIL.image
     """
     img = img_in.copy()
-    img = cv2.resize(img,(32, 32))
-    img = img[:, :, ::-1]   # BGR --> RGB
+    img = cv2.resize(img, (32, 32))
+    img = img[:, :, ::-1]  # BGR --> RGB
     transform = transforms.Compose([
         transforms.ToTensor(),
-        transforms.Normalize([0.4948052, 0.48568845, 0.44682974], [0.24580306, 0.24236229, 0.2603115])
+        transforms.Normalize([0.4948052, 0.48568845, 0.44682974],
+                             [0.24580306, 0.24236229, 0.2603115])
     ])
     img_input = img_transform(img, transform)
     return img_input
@@ -72,7 +73,7 @@ def farward_hook(module, input, output):
 
 
 def show_cam_on_image(img, mask, out_dir):
-    heatmap = cv2.applyColorMap(np.uint8(255*mask), cv2.COLORMAP_JET)
+    heatmap = cv2.applyColorMap(np.uint8(255 * mask), cv2.COLORMAP_JET)
     heatmap = np.float32(heatmap) / 255
     cam = heatmap + np.float32(img)
     cam = cam / np.max(cam)
@@ -130,11 +131,16 @@ def gen_cam(feature_map, grads):
 if __name__ == '__main__':
 
     BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-    path_img = os.path.join(BASE_DIR, "..", "..", "Data", "cam_img", "test_img_8.png")
-    path_net = os.path.join(BASE_DIR, "..", "..", "Data", "net_params_72p.pkl")
-    output_dir = os.path.join(BASE_DIR, "..", "..", "Result", "backward_hook_cam")
-
-    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+    # 在 PyTorch_Tutorial/Code 目录下运行
+    # path_img = os.path.join(BASE_DIR, "..", "..", "Data", "cam_img", "test_img_8.png")
+    # path_net = os.path.join(BASE_DIR, "..", "..", "Data", "net_params_72p.pkl")
+    # output_dir = os.path.join(BASE_DIR, "..", "..", "Result", "backward_hook_cam")
+    # 在 PyTorch_Tutorial 目录下运行
+    path_img = os.path.join(".", "Data", "cam_img", "test_img_8.png")
+    path_net = os.path.join(".", "Data", "net_params_72p.pkl")
+    output_dir = os.path.join(".", "Result", "backward_hook_cam")
+    classes = ('plane', 'car', 'bird', 'cat', 'deer', 'dog', 'frog', 'horse',
+               'ship', 'truck')
     fmap_block = list()
     grad_block = list()
 
@@ -166,19 +172,3 @@ if __name__ == '__main__':
     # 保存cam图片
     img_show = np.float32(cv2.resize(img, (32, 32))) / 255
     show_cam_on_image(img_show, cam, output_dir)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

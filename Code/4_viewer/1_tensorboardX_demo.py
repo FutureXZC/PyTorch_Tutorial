@@ -8,7 +8,10 @@ from torchvision import datasets
 from tensorboardX import SummaryWriter
 
 resnet18 = models.resnet18(False)
-writer = SummaryWriter(os.path.join("..", "..", "Result", "runs"))
+# 在 PyTorch_Tutorial/Code 目录下运行
+# writer = SummaryWriter(os.path.join("..", "..", "Result", "runs"))
+# 在 PyTorch_Tutorial 目录下运行
+writer = SummaryWriter(os.path.join(".", "Result", "runs"))
 sample_rate = 44100
 freqs = [262, 294, 330, 349, 392, 440, 440, 440, 440, 440, 440]
 
@@ -19,17 +22,22 @@ false_negative_counts = [0, 11, 54, 70, 75]
 precision = [0.3333333, 0.3786982, 0.5384616, 1.0, 0.0]
 recall = [1.0, 0.8533334, 0.28, 0.0666667, 0.0]
 
-
 for n_iter in range(100):
     s1 = torch.rand(1)  # value to keep
     s2 = torch.rand(1)
     # data grouping by `slash`
     writer.add_scalar(os.path.join("data", "scalar_systemtime"), s1[0], n_iter)
     # data grouping by `slash`
-    writer.add_scalar(os.path.join("data", "scalar_customtime"), s1[0], n_iter, walltime=n_iter)
-    writer.add_scalars(os.path.join("data", "scalar_group"), {"xsinx": n_iter * np.sin(n_iter),
-                                             "xcosx": n_iter * np.cos(n_iter),
-                                             "arctanx": np.arctan(n_iter)}, n_iter)
+    writer.add_scalar(os.path.join("data", "scalar_customtime"),
+                      s1[0],
+                      n_iter,
+                      walltime=n_iter)
+    writer.add_scalars(
+        os.path.join("data", "scalar_group"), {
+            "xsinx": n_iter * np.sin(n_iter),
+            "xcosx": n_iter * np.cos(n_iter),
+            "arctanx": np.arctan(n_iter)
+        }, n_iter)
     x = torch.rand(32, 3, 64, 64)  # output from network
     if n_iter % 10 == 0:
         x = vutils.make_grid(x, normalize=True, scale_each=True)
@@ -40,32 +48,45 @@ for n_iter in range(100):
         x = torch.zeros(sample_rate * 2)
         for i in range(x.size(0)):
             # sound amplitude should in [-1, 1]
-            x[i] = np.cos(freqs[n_iter // 10] * np.pi *
-                          float(i) / float(sample_rate))
+            x[i] = np.cos(freqs[n_iter // 10] * np.pi * float(i) /
+                          float(sample_rate))
         writer.add_audio('myAudio', x, n_iter)
         writer.add_text('Text', 'text logged at step:' + str(n_iter), n_iter)
         writer.add_text('markdown Text', '''a|b\n-|-\nc|d''', n_iter)
         for name, param in resnet18.named_parameters():
             if 'bn' not in name:
                 writer.add_histogram(name, param, n_iter)
-        writer.add_pr_curve('xoxo', np.random.randint(2, size=100), np.random.rand(
-            100), n_iter)  # needs tensorboard 0.4RC or later
+        writer.add_pr_curve('xoxo', np.random.randint(2, size=100),
+                            np.random.rand(100),
+                            n_iter)  # needs tensorboard 0.4RC or later
         writer.add_pr_curve_raw('prcurve with raw data', true_positive_counts,
-                                false_positive_counts,
-                                true_negative_counts,
-                                false_negative_counts,
-                                precision,
-                                recall, n_iter)
+                                false_positive_counts, true_negative_counts,
+                                false_negative_counts, precision, recall,
+                                n_iter)
 # export scalar data to JSON for external processing
-writer.export_scalars_to_json(os.path.join("..", "..", "Result", "all_scalars.json"))
+writer.export_scalars_to_json(
+    # 在 PyTorch_Tutorial/Code 目录下运行
+    # os.path.join("..", "..", "Result", "all_scalars.json"))
+    # 在 PyTorch_Tutorial 目录下运行
+    os.path.join(".", "Result", "all_scalars.json"))
 
-dataset = datasets.MNIST(os.path.join("..", "..", "Data", "mnist"), train=False, download=True)
+# 在 PyTorch_Tutorial/Code 目录下运行
+# dataset = datasets.MNIST(os.path.join("..", "..", "Data", "mnist"),
+# 在 PyTorch_Tutorial 目录下运行
+dataset = datasets.MNIST(os.path.join(".", "Data", "mnist"),
+                         train=False,
+                         download=True)
 images = dataset.test_data[:100].float()
 label = dataset.test_labels[:100]
 features = images.view(100, 784)
 writer.add_embedding(features, metadata=label, label_img=images.unsqueeze(1))
 writer.add_embedding(features, global_step=1, tag='noMetadata')
-dataset = datasets.MNIST(os.path.join("..", "..", "Data", "mnist"), train=True, download=True)
+# 在 PyTorch_Tutorial/Code 目录下运行
+# dataset = datasets.MNIST(os.path.join("..", "..", "Data", "mnist"),
+# 在 PyTorch_Tutorial 目录下运行
+dataset = datasets.MNIST(os.path.join(".", "Data", "mnist"),
+                         train=True,
+                         download=True)
 images_train = dataset.train_data[:100].float()
 labels_train = dataset.train_labels[:100]
 features_train = images_train.view(100, 784)
@@ -76,8 +97,11 @@ all_images = torch.cat((images, images_train))
 dataset_label = ['test'] * 100 + ['train'] * 100
 all_labels = list(zip(all_labels, dataset_label))
 
-writer.add_embedding(all_features, metadata=all_labels, label_img=all_images.unsqueeze(1),
-                     metadata_header=['digit', 'dataset'], global_step=2)
+writer.add_embedding(all_features,
+                     metadata=all_labels,
+                     label_img=all_images.unsqueeze(1),
+                     metadata_header=['digit', 'dataset'],
+                     global_step=2)
 
 # VIDEO
 vid_images = dataset.train_data[:16 * 48]
